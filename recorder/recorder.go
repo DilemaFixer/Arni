@@ -33,7 +33,7 @@ func NewVoiceRecorder() (*VoiceRecorder, error) {
 
 func (vr *VoiceRecorder) StartRecording() error {
 	if vr.isRecording {
-		return fmt.Errorf("уже идет запись")
+		return fmt.Errorf("recording is tarted before")
 	}
 
 	vr.AudioBuffer = vr.AudioBuffer[:0]
@@ -49,7 +49,7 @@ func (vr *VoiceRecorder) StartRecording() error {
 		}
 		sampleCount := framecount * deviceConfig.Capture.Channels
 		for i := uint32(0); i < sampleCount; i++ {
-			offset := i * 4 // 4 байта на float32
+			offset := i * 4 
 			if int(offset+4) <= len(pInputSample) {
 				sample := *(*float32)(unsafe.Pointer(&pInputSample[offset]))
 				vr.AudioBuffer = append(vr.AudioBuffer, sample)
@@ -72,7 +72,7 @@ func (vr *VoiceRecorder) StartRecording() error {
 
 func (vr *VoiceRecorder) StopRecording() error {
 	if !vr.isRecording {
-		return fmt.Errorf("запись не была начата")
+		return fmt.Errorf("recoding is not started")
 	}
 
 	vr.isRecording = false
@@ -83,15 +83,12 @@ func (vr *VoiceRecorder) StopRecording() error {
 		vr.captureDevice = nil
 	}
 
-	fmt.Printf("Записано %d сэмплов (%.2f сек)\n",
-		len(vr.AudioBuffer), float64(len(vr.AudioBuffer))/16000.0)
-
 	return nil
 }
 
 func (vr *VoiceRecorder) PlayRecording() error {
 	if len(vr.AudioBuffer) == 0 {
-		return fmt.Errorf("нет данных для воспроизведения")
+		return fmt.Errorf("not data")
 	}
 
 	samples := make([]float32, len(vr.AudioBuffer))
